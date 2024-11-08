@@ -17,48 +17,71 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.MotorSpecs;
+import frc.robot.Constants.MotorSpecs_2;
 import frc.robot.Constants.PIDConstants;
 import frc.robot.Constants.SimulationConstants;
 
 public class SimpleDriveTrainSubsystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
 // define motors on the root
-  private CANSparkMax leftFrontMotor  = new CANSparkMax(MotorSpecs.leftFrontMotorDeviceId, MotorType.kBrushless);
-  private CANSparkMax leftBackMotor   = new CANSparkMax(MotorSpecs.leftBackMotorDeviceId, MotorType.kBrushless);
-  private CANSparkMax rightFrontMotor = new CANSparkMax(MotorSpecs.rightFrontMotorDeviceId, MotorType.kBrushless);
-  private CANSparkMax rightBackMotor  = new CANSparkMax(MotorSpecs.rightBackMotorDeviceId, MotorType.kBrushless);
+  private CANSparkMax leftFrontMotor ;
+  private CANSparkMax leftBackMotor  ;
+  private CANSparkMax rightFrontMotor;
+  private CANSparkMax rightBackMotor ;
 
   // get encoders for left/right front motors
-  private RelativeEncoder leftFrontEncoder = leftFrontMotor.getEncoder();
-  private RelativeEncoder rightFrontEncoder = rightFrontMotor.getEncoder();
+  private RelativeEncoder leftFrontEncoder;
+  private RelativeEncoder rightFrontEncoder;
 
   // fake encoder increments for simulations
   private int encoderCounter = 0;
 
   // use differential drive to have coordinated motor movement
-  private DifferentialDrive differentialDrive = new DifferentialDrive(leftFrontMotor, rightFrontMotor);
+  private DifferentialDrive differentialDrive;
 
   private final SparkPIDController speedPIDController;
   
+
   public SimpleDriveTrainSubsystem() {
-    leftFrontMotor.restoreFactoryDefaults();
-    leftBackMotor.restoreFactoryDefaults();
-    rightFrontMotor.restoreFactoryDefaults();
-    rightBackMotor.restoreFactoryDefaults();
+    switch ( Constants.motorType ) {
+      case 1:
+        this.leftFrontMotor  = new CANSparkMax(MotorSpecs.leftFrontMotorDeviceId, MotorType.kBrushless);
+        this.leftBackMotor   = new CANSparkMax(MotorSpecs.leftBackMotorDeviceId, MotorType.kBrushless);
+        this.rightFrontMotor = new CANSparkMax(MotorSpecs.rightFrontMotorDeviceId, MotorType.kBrushless);
+        this.rightBackMotor  = new CANSparkMax(MotorSpecs.rightBackMotorDeviceId, MotorType.kBrushless);
+        break;
+      case 2:
+        this.leftFrontMotor  = new CANSparkMax(MotorSpecs_2.leftFrontMotorDeviceId, MotorType.kBrushless);
+        this.leftBackMotor   = new CANSparkMax(MotorSpecs_2.leftBackMotorDeviceId, MotorType.kBrushless);
+        this.rightFrontMotor = new CANSparkMax(MotorSpecs_2.rightFrontMotorDeviceId, MotorType.kBrushless);
+        this.rightBackMotor  = new CANSparkMax(MotorSpecs_2.rightBackMotorDeviceId, MotorType.kBrushless);
+        break;
+      default:
+        System.out.println("Undefined motor type!");
+    }
+    
+    this.leftFrontMotor.restoreFactoryDefaults();
+    this.leftBackMotor.restoreFactoryDefaults();
+    this.rightFrontMotor.restoreFactoryDefaults();
+    this.rightBackMotor.restoreFactoryDefaults();
 
     // make sure back follows front (replacement for the deprecated MotorControllerGroup)
-    leftBackMotor.follow(leftFrontMotor);
-    rightBackMotor.follow(rightFrontMotor);
+    this.leftBackMotor.follow(leftFrontMotor);
+    this.rightBackMotor.follow(rightFrontMotor);
 
     // one side need to be inverted; NOTE
-    rightFrontMotor.setInverted(true);
-    rightBackMotor.setInverted(true);
+    this.rightFrontMotor.setInverted(true);
+    this.rightBackMotor.setInverted(true);
 
+    this.leftFrontEncoder = this.leftFrontMotor.getEncoder();
+    this.rightFrontEncoder = this.rightFrontMotor.getEncoder();
     // reset encoder values to zero
-    leftFrontEncoder.setPosition(0);
-    rightFrontEncoder.setPosition(0);
+    this.leftFrontEncoder.setPosition(0);
+    this.rightFrontEncoder.setPosition(0);
 
-    speedPIDController = leftFrontMotor.getPIDController();
+    this.differentialDrive = new DifferentialDrive(this.leftFrontMotor, this.rightFrontMotor);
+
+    speedPIDController = this.leftFrontMotor.getPIDController();
     speedPIDController.setFeedbackDevice(leftFrontEncoder);
     speedPIDController.setP(PIDConstants.kpSpeed);
     speedPIDController.setI(PIDConstants.kiSpeed);
@@ -118,7 +141,7 @@ public class SimpleDriveTrainSubsystem extends SubsystemBase {
   public double getAverageEncoderValue(){
     if (SimulationConstants.isSim) {
       return encoderCounter;
-    } else {
+    } else {      
       return 0.5 * ( leftFrontEncoder.getPosition() + rightFrontEncoder.getPosition());
     }
   }

@@ -53,7 +53,7 @@ public class RobotContainer {
     */
     m_simpleDriveTrainSubsystem.setDefaultCommand(new ArcadeDriveCommand(m_simpleDriveTrainSubsystem,
                 () -> -accountForJitter("speed"),
-                () -> accountForJitter("turn"))
+                () -> -accountForJitter("turn"))
     );
 
     // autonomous Command stuff
@@ -111,12 +111,12 @@ public class RobotContainer {
       new DriveForwardCommand(m_simpleDriveTrainSubsystem, 0., 0.)));
     
     //return new SequentialCommandGroup();
-    return null;
+    //return null;
     // test on the robot - maybe the controller doesn't work on Autonomous??
-    /*
+    /**/
     return new SequentialCommandGroup(
       new DriveForwardTimerCommand(m_simpleDriveTrainSubsystem, SimulationConstants.simTimerAutonoumous, SimulationConstants.simSpeed));
-    */
+    /**/
   }
 
   private double accountForJitter(String axisName) {
