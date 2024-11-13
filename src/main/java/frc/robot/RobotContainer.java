@@ -11,9 +11,13 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.DriveArcadeTimerCommand;
 import frc.robot.commands.DriveForwardCommand;
 import frc.robot.commands.DriveForwardTimerCommand;
+import frc.robot.commands.SetDriveParametersCommand;
 import frc.robot.commands.TankDriveCommand;
 import frc.robot.commands.ArcadeDriveCommand;
+import frc.robot.commands.ArcadeDriveCommandTalonFX;
 import frc.robot.subsystems.SimpleDriveTrainSubsystem;
+import frc.robot.subsystems.SimpleDriveTrainSubsystemSparkMax;
+import frc.robot.subsystems.SimpleDriveTrainSubsystemTalonFX;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -33,6 +37,9 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final SimpleDriveTrainSubsystem m_simpleDriveTrainSubsystem = new SimpleDriveTrainSubsystem();
 
+  //private final SimpleDriveTrainSubsystemTalonFX m_simpleDriveTrainSubsystemTalonFX = new SimpleDriveTrainSubsystemTalonFX();
+
+
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
@@ -48,13 +55,32 @@ public class RobotContainer {
     /*
     m_simpleDriveTrainSubsystem.setDefaultCommand(new ArcadeDriveCommand(m_simpleDriveTrainSubsystem,
                 () -> -m_joystick.getRawAxis(OperatorConstants.kArcadeDriveSpeedAxis),
-                () -> m_joystick.getRawAxis(OperatorConstants.kArcadeDriveTurnAxis))
+                () -> -m_joystick.getRawAxis(OperatorConstants.kArcadeDriveTurnAxis))
     );
     */
-    m_simpleDriveTrainSubsystem.setDefaultCommand(new ArcadeDriveCommand(m_simpleDriveTrainSubsystem,
-                () -> -accountForJitter("speed"),
-                () -> -accountForJitter("turn"))
-    );
+    // STEAM demo case
+    if (Constants.isDemo) {
+      double maxSpeed = SimulationConstants.simSpeed;
+      double maxTurn  = SimulationConstants.simTurn;
+      m_simpleDriveTrainSubsystem.setDefaultCommand(new ArcadeDriveCommand(m_simpleDriveTrainSubsystem,
+                  () -> -accountForJitter("speed", maxSpeed),
+                  () -> -accountForJitter("turn", maxTurn))
+      );
+    } else {
+      if ( Constants.motorType == 3 ) {
+        /*
+        m_simpleDriveTrainSubsystemTalonFX.setDefaultCommand(new ArcadeDriveCommandTalonFX(m_simpleDriveTrainSubsystemTalonFX,
+        () -> -accountForJitter("speed", 1.),
+        () -> -accountForJitter("turn", 1.))
+        );
+        */
+      } else {
+        m_simpleDriveTrainSubsystem.setDefaultCommand(new ArcadeDriveCommand(m_simpleDriveTrainSubsystem,
+                    () -> -accountForJitter("speed", 1.),
+                    () -> -accountForJitter("turn", 1.))
+        );
+      }
+    }
 
     // autonomous Command stuff
     m_chooser = new SendableChooser<>();
@@ -79,16 +105,23 @@ public class RobotContainer {
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
-    // set Button.b as tankdrive for 50 revs at speed 0.4
-    m_driverController.y().onTrue(new DriveForwardCommand(m_simpleDriveTrainSubsystem, SimulationConstants.simEncoderRevolutions, SimulationConstants.simSpeed));
-    m_driverController.x().onTrue(new DriveForwardCommand(m_simpleDriveTrainSubsystem, 0., 0.));
-  
-    // set Button.a as tankdrive for time = 5 sec
-    m_driverController.a().onTrue(new DriveForwardTimerCommand(m_simpleDriveTrainSubsystem, SimulationConstants.simTimer, SimulationConstants.simSpeed));
+    if ( Constants.isDemo ) {
+      // set a slower speed
+      m_driverController.y().onTrue(new SetDriveParametersCommand(0.4, 0.2));
+      // set a faster speed
+      m_driverController.x().onTrue(new SetDriveParametersCommand(0.6, 0.4));
+      m_driverController.a().onTrue(new SetDriveParametersCommand(0.66, 0.44));
+    } else {
+      // set Button.b as tankdrive for 50 revs at speed 0.4
+      m_driverController.y().onTrue(new DriveForwardCommand(m_simpleDriveTrainSubsystem, SimulationConstants.simEncoderRevolutions, SimulationConstants.simSpeed));
+      m_driverController.x().onTrue(new DriveForwardCommand(m_simpleDriveTrainSubsystem, 0., 0.));
     
-    // set Button.y as arcadedrive for time = 2.5 sec
-    m_driverController.b().onTrue(new DriveArcadeTimerCommand(m_simpleDriveTrainSubsystem, SimulationConstants.simTimer / 2., SimulationConstants.simSpeed, SimulationConstants.simTurn));
-    
+      // set Button.a as tankdrive for time = 5 sec
+      m_driverController.a().onTrue(new DriveForwardTimerCommand(m_simpleDriveTrainSubsystem, SimulationConstants.simTimer, SimulationConstants.simSpeed));
+      
+      // set Button.y as arcadedrive for time = 2.5 sec
+      m_driverController.b().onTrue(new DriveArcadeTimerCommand(m_simpleDriveTrainSubsystem, SimulationConstants.simTimer / 2., SimulationConstants.simSpeed, SimulationConstants.simTurn));
+    }
   }
 
   /**
@@ -101,6 +134,7 @@ public class RobotContainer {
     //return Autos.exampleAuto(m_exampleSubsystem);
     //
     // execute the timed autonoumous mode via a CommandGroup
+    /* button control doesn't work - by design?? in Autonomous mode
     m_driverController.y().onTrue(new SequentialCommandGroup(
       new DriveForwardTimerCommand(m_simpleDriveTrainSubsystem, SimulationConstants.simTimerAutonoumous, SimulationConstants.simSpeed)));
     
@@ -109,23 +143,30 @@ public class RobotContainer {
 
     m_driverController.b().onTrue(new SequentialCommandGroup(
       new DriveForwardCommand(m_simpleDriveTrainSubsystem, 0., 0.)));
-    
-    //return new SequentialCommandGroup();
-    //return null;
-    // test on the robot - maybe the controller doesn't work on Autonomous??
-    /**/
-    return new SequentialCommandGroup(
-      new DriveForwardTimerCommand(m_simpleDriveTrainSubsystem, SimulationConstants.simTimerAutonoumous, SimulationConstants.simSpeed));
-    /**/
+    */
+
+    if ( Constants.isDemo ) {
+      // no action in Demo-mode
+      System.out.println("no autonomous functionality in Demo-mode!");
+      return new SequentialCommandGroup();
+    } else {
+      return new SequentialCommandGroup(
+        new DriveForwardTimerCommand(m_simpleDriveTrainSubsystem, SimulationConstants.simTimerAutonoumous, SimulationConstants.simSpeed));
+    }
+      /**/
   }
 
-  private double accountForJitter(String axisName) {
+  private double accountForJitter(String axisName, double maxSetting) {
     double jitter = 0.;
     if (axisName == "speed") {
       jitter = m_joystick.getRawAxis(OperatorConstants.kArcadeDriveSpeedAxis);
     } else if (axisName == "turn") {
       jitter = m_joystick.getRawAxis(OperatorConstants.kArcadeDriveTurnAxis);
     }
+
+    jitter = Math.abs(jitter) > maxSetting ? Math.signum(jitter) * maxSetting : jitter;
+    if ( Constants.debug) System.out.println(jitter);
+
     if ( Math.abs(jitter) < OperatorConstants.jitterTolerance) {
       jitter = 0.;
     }

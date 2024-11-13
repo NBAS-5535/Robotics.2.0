@@ -13,10 +13,14 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static boolean debug = false;
   // which robot is being driven?
   //    1: 5535_PID (Mater); 
   //    2: 5535_Backup
+  //    3: TalonFX
   public static int motorType = 1; 
+  public static final boolean isSim = true;
+  public static final boolean isDemo = true;
 
   public static class MotorSpecs {
     public static int leftFrontMotorDeviceId  = 4;
@@ -49,18 +53,19 @@ public final class Constants {
     public static final double jitterTolerance = 0.05;
   }
 
-  public static class SimulationConstants {
-    public static final boolean isSim = false;
+   public static class SimulationConstants {
     public static final double simTimer = 5.;
     public static final double simEncoderRevolutions = 50.;
-    public static final double simSpeed = 0.4;
-    public static final double simTurn = 0.2;
+    public static double simSpeed = 0.7;
+    public static double simTurn = 0.3;
     
     public static final double simTimerAutonoumous = 10.;
     public static final double simTimerAutonoumousAutoInterface = 8.;
 
   }
 
+  public static double storeSpeed;
+  
   public static class PIDConstants {
     public static final double kpSpeed = 1.0;
     public static final double kiSpeed = 0.;
@@ -70,4 +75,5 @@ public final class Constants {
     public static final double kiTurn = 0.;
     public static final double kdTurn = 0.;
   }
+  
 }

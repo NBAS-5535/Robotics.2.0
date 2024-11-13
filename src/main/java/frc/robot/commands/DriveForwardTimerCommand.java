@@ -9,6 +9,7 @@ import org.opencv.core.Mat;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.subsystems.SimpleDriveTrainSubsystem;
 
 public class DriveForwardTimerCommand extends Command {
@@ -47,7 +48,7 @@ public class DriveForwardTimerCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if ( 1 == 0 ) { 
+    if ( Constants.debug ) { 
       System.out.println("DriveForwardTimerCommand running!");
       System.out.println(Timer.getFPGATimestamp());
     };

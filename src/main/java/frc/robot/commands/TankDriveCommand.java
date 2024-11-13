@@ -7,6 +7,7 @@ package frc.robot.commands;
 import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.subsystems.SimpleDriveTrainSubsystem;
 
 public class TankDriveCommand extends Command {
@@ -36,7 +37,7 @@ public class TankDriveCommand extends Command {
     double rightSpeed = m_leftMotorSpeedFunction.get();
     double leftSpeed  = m_rightMotorSpeedFunction.get();
 
-    m_simpleDriveSubsystem.tankDrive(rightSpeed, leftSpeed);
+    if (Constants.debug) m_simpleDriveSubsystem.tankDrive(rightSpeed, leftSpeed);
   }
 
   // Called once the command ends or is interrupted.

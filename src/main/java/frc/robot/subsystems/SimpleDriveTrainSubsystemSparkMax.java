@@ -22,7 +22,7 @@ import frc.robot.Constants.MotorSpecs_2;
 import frc.robot.Constants.PIDConstants;
 import frc.robot.Constants.SimulationConstants;
 
-public class SimpleDriveTrainSubsystem extends SubsystemBase {
+public class SimpleDriveTrainSubsystemSparkMax extends SimpleDriveTrainSubsystem {
   /** Creates a new ExampleSubsystem. */
 // define motors on the root
   private CANSparkMax leftFrontMotor ;
@@ -43,7 +43,7 @@ public class SimpleDriveTrainSubsystem extends SubsystemBase {
   private final SparkPIDController speedPIDController;
   
 
-  public SimpleDriveTrainSubsystem() {
+  public SimpleDriveTrainSubsystemSparkMax() {
     switch ( Constants.motorType ) {
       case 1:
         this.leftFrontMotor  = new CANSparkMax(MotorSpecs.leftFrontMotorDeviceId, MotorType.kBrushless);
@@ -59,6 +59,11 @@ public class SimpleDriveTrainSubsystem extends SubsystemBase {
         break;
       default:
         System.out.println("Undefined motor type!");
+        this.leftFrontMotor  = new CANSparkMax(MotorSpecs_2.leftFrontMotorDeviceId, MotorType.kBrushless);
+        this.leftBackMotor   = new CANSparkMax(MotorSpecs_2.leftBackMotorDeviceId, MotorType.kBrushless);
+        this.rightFrontMotor = new CANSparkMax(MotorSpecs_2.rightFrontMotorDeviceId, MotorType.kBrushless);
+        this.rightBackMotor  = new CANSparkMax(MotorSpecs_2.rightBackMotorDeviceId, MotorType.kBrushless);
+
     }
     
     this.leftFrontMotor.restoreFactoryDefaults();
@@ -163,6 +168,7 @@ public class SimpleDriveTrainSubsystem extends SubsystemBase {
     //SmartDashboard.putString("Motor state", "Stopped");
   }
 
+  @Override
   public void resetEncoders() {
     leftFrontEncoder.setPosition(0);
     rightFrontEncoder.setPosition(0);

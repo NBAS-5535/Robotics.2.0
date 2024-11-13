@@ -5,8 +5,7 @@
 package frc.robot.commands;
 
 import frc.robot.Constants;
-import frc.robot.Constants.SimulationConstants;
-import frc.robot.subsystems.SimpleDriveTrainSubsystem;
+import frc.robot.subsystems.SimpleDriveTrainSubsystemTalonFX;
 
 import java.util.function.Supplier;
 
@@ -16,20 +15,18 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** An example command that uses an example subsystem. */
-public class ArcadeDriveCommand extends Command {
+public class ArcadeDriveCommandTalonFX extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-  private final SimpleDriveTrainSubsystem m_simpleDriveSubsystem;
+  private final SimpleDriveTrainSubsystemTalonFX m_simpleDriveSubsystem;
   // run functions and use the return value within each command
   private final Supplier<Double> m_speedFunction, m_turnFunction;
-
-  private int debugCounter;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public ArcadeDriveCommand(SimpleDriveTrainSubsystem subsystem, Supplier<Double> speedFunction, Supplier<Double> turnFunction) {
+  public ArcadeDriveCommandTalonFX(SimpleDriveTrainSubsystemTalonFX subsystem, Supplier<Double> speedFunction, Supplier<Double> turnFunction) {
     this.m_simpleDriveSubsystem = subsystem;
     this.m_speedFunction = speedFunction;
     this.m_turnFunction = turnFunction;
@@ -40,7 +37,7 @@ public class ArcadeDriveCommand extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    System.out.println("ArcadeDriveCommand started!");
+    System.out.println("ArcadeDriveCommand started! TalonFX");
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -51,31 +48,21 @@ public class ArcadeDriveCommand extends Command {
     double realTimeTurn  = m_turnFunction.get();
     
     if (Constants.debug) {
-      if (Math.abs(realTimeSpeed) > 0. || Math.abs(realTimeTurn) > 0.) {
-        System.out.println("ArcadeDrive:" + Double.toString(realTimeSpeed) + " | " + Double.toString(realTimeTurn));
+      if (Math.abs(realTimeSpeed) > 0 || Math.abs(realTimeTurn) > 0.) {
+        System.out.println(Double.toString(realTimeSpeed) + " / " + Double.toString(realTimeTurn));
       }
     }
 
-    // limit the max speed to those values in SimulationConstants
-    realTimeSpeed = Math.abs(realTimeSpeed) > SimulationConstants.simSpeed ? Math.signum(realTimeSpeed) * SimulationConstants.simSpeed : realTimeSpeed;
-    realTimeTurn = Math.abs(realTimeTurn) > SimulationConstants.simTurn ? Math.signum(realTimeTurn) * SimulationConstants.simTurn : realTimeTurn;
-
-    if (debugCounter % 100 == 0) {
-      System.out.println("ArcadeDrive:" + String.valueOf(realTimeSpeed) + " / " + String.valueOf(realTimeTurn));
-      System.out.println("ArcadeDrive:" + String.valueOf(SimulationConstants.simSpeed) + " / " + String.valueOf(SimulationConstants.simTurn));
-    }
     SmartDashboard.putNumber("speed", realTimeSpeed);
     SmartDashboard.putNumber("rotate", realTimeTurn);
 
     m_simpleDriveSubsystem.arcadeDrive(realTimeSpeed, realTimeTurn);
-
-    debugCounter++;
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    System.out.println("ArcadeDriveCommand ended!");
+    System.out.println("ArcadeDriveCommand ended! TalonFX");
     m_simpleDriveSubsystem.stopRobot();
   }
 

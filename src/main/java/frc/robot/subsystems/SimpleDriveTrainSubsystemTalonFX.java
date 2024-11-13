@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.*;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
@@ -13,80 +14,64 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-//import edu.wpi.first.wpilibj.drive.RobotDriveBase.MotorType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.MotorSpecs;
-import frc.robot.Constants.MotorSpecs_2;
+import frc.robot.Constants.MotorSpecs_3;
 import frc.robot.Constants.PIDConstants;
 import frc.robot.Constants.SimulationConstants;
 
-public class SimpleDriveTrainSubsystem extends SubsystemBase {
+public class SimpleDriveTrainSubsystemTalonFX extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
 // define motors on the root
-  private CANSparkMax leftFrontMotor ;
-  private CANSparkMax leftBackMotor  ;
-  private CANSparkMax rightFrontMotor;
-  private CANSparkMax rightBackMotor ;
+  //TalonFX motors
+  private TalonFX leftFrontMotor_TalonFX;
+  private TalonFX leftBackMotor_TalonFX;
+  private TalonFX rightFrontMotor_TalonFX;
+  private TalonFX rightBackMotor_TalonFX;
 
   // get encoders for left/right front motors
-  private RelativeEncoder leftFrontEncoder;
-  private RelativeEncoder rightFrontEncoder;
+  
 
   // fake encoder increments for simulations
   private int encoderCounter = 0;
 
   // use differential drive to have coordinated motor movement
   private DifferentialDrive differentialDrive;
-
-  private final SparkPIDController speedPIDController;
-  
-
-  public SimpleDriveTrainSubsystem() {
-    switch ( Constants.motorType ) {
-      case 1:
-        this.leftFrontMotor  = new CANSparkMax(MotorSpecs.leftFrontMotorDeviceId, MotorType.kBrushless);
-        this.leftBackMotor   = new CANSparkMax(MotorSpecs.leftBackMotorDeviceId, MotorType.kBrushless);
-        this.rightFrontMotor = new CANSparkMax(MotorSpecs.rightFrontMotorDeviceId, MotorType.kBrushless);
-        this.rightBackMotor  = new CANSparkMax(MotorSpecs.rightBackMotorDeviceId, MotorType.kBrushless);
-        break;
-      case 2:
-        this.leftFrontMotor  = new CANSparkMax(MotorSpecs_2.leftFrontMotorDeviceId, MotorType.kBrushless);
-        this.leftBackMotor   = new CANSparkMax(MotorSpecs_2.leftBackMotorDeviceId, MotorType.kBrushless);
-        this.rightFrontMotor = new CANSparkMax(MotorSpecs_2.rightFrontMotorDeviceId, MotorType.kBrushless);
-        this.rightBackMotor  = new CANSparkMax(MotorSpecs_2.rightBackMotorDeviceId, MotorType.kBrushless);
-        break;
-      default:
-        System.out.println("Undefined motor type!");
-    }
+   
+    //private final SparkPIDController speedPIDController;
     
-    this.leftFrontMotor.restoreFactoryDefaults();
-    this.leftBackMotor.restoreFactoryDefaults();
-    this.rightFrontMotor.restoreFactoryDefaults();
-    this.rightBackMotor.restoreFactoryDefaults();
+  
+  public SimpleDriveTrainSubsystemTalonFX() {
+    this.leftFrontMotor_TalonFX  = new TalonFX(MotorSpecs_3.leftFrontMotorDeviceId);
+    this.leftBackMotor_TalonFX   = new TalonFX(MotorSpecs_3.leftBackMotorDeviceId);
+    this.rightFrontMotor_TalonFX = new TalonFX(MotorSpecs_3.rightFrontMotorDeviceId);
+    this.rightBackMotor_TalonFX  = new TalonFX(MotorSpecs_3.rightBackMotorDeviceId);
 
     // make sure back follows front (replacement for the deprecated MotorControllerGroup)
-    this.leftBackMotor.follow(leftFrontMotor);
-    this.rightBackMotor.follow(rightFrontMotor);
+    //this.leftBackMotor_TalonFX.follow(leftFrontMotor_TalonFX);
+    //this.rightBackMotor.follow(rightFrontMotor);
 
     // one side need to be inverted; NOTE
-    this.rightFrontMotor.setInverted(true);
-    this.rightBackMotor.setInverted(true);
+    this.leftFrontMotor_TalonFX.setInverted(false);
+    this.leftBackMotor_TalonFX.setInverted(false);
+    this.rightFrontMotor_TalonFX.setInverted(true);
+    this.rightBackMotor_TalonFX.setInverted(true);
 
-    this.leftFrontEncoder = this.leftFrontMotor.getEncoder();
-    this.rightFrontEncoder = this.rightFrontMotor.getEncoder();
+    //this.leftFrontEncoder = this.leftFrontMotor.getEncoder();
+    //this.rightFrontEncoder = this.rightFrontMotor.getEncoder();
     // reset encoder values to zero
-    this.leftFrontEncoder.setPosition(0);
-    this.rightFrontEncoder.setPosition(0);
+    this.leftFrontMotor_TalonFX.setPosition(0);
+    this.rightFrontMotor_TalonFX.setPosition(0);
 
-    this.differentialDrive = new DifferentialDrive(this.leftFrontMotor, this.rightFrontMotor);
+    this.differentialDrive = new DifferentialDrive(this.leftFrontMotor_TalonFX, this.rightFrontMotor_TalonFX);
 
-    speedPIDController = this.leftFrontMotor.getPIDController();
-    speedPIDController.setFeedbackDevice(leftFrontEncoder);
-    speedPIDController.setP(PIDConstants.kpSpeed);
-    speedPIDController.setI(PIDConstants.kiSpeed);
-    speedPIDController.setD(PIDConstants.kdSpeed);
+    //speedPIDController = this.leftFrontMotor_TalonFX.getPIDController();
+    //speedPIDController.setFeedbackDevice(leftFrontEncoder);
+    //speedPIDController.setP(PIDConstants.kpSpeed);
+    //speedPIDController.setI(PIDConstants.kiSpeed);
+    //speedPIDController.setD(PIDConstants.kdSpeed);
     
 
   }
@@ -132,20 +117,22 @@ public class SimpleDriveTrainSubsystem extends SubsystemBase {
   // user-defined methods
   // get encoder values
   public double getLeftFrontEncoderValue(){
-    return leftFrontEncoder.getPosition();
+    return this.leftFrontMotor_TalonFX.getPosition().getValue().doubleValue();
   }
 
   public double getRightFrontEncoderValue(){
-    return rightFrontEncoder.getPosition();
+    return this.rightFrontMotor_TalonFX.getPosition().getValue().doubleValue();
   }
 
   public double getAverageEncoderValue(){
     if (Constants.isSim) {
       return encoderCounter;
     } else {      
-      return 0.5 * ( leftFrontEncoder.getPosition() + rightFrontEncoder.getPosition());
+      return 0.5 * ( leftFrontMotor_TalonFX.getPosition().getValue().doubleValue() + 
+                     rightFrontMotor_TalonFX.getPosition().getValue().doubleValue());
     }
   }
+ 
 
   // move the robot in arcade/tank modes
   public void arcadeDrive(double forward, double turn){
@@ -164,7 +151,6 @@ public class SimpleDriveTrainSubsystem extends SubsystemBase {
   }
 
   public void resetEncoders() {
-    leftFrontEncoder.setPosition(0);
-    rightFrontEncoder.setPosition(0);
+
   }
 }
