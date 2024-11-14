@@ -110,7 +110,7 @@ public class RobotContainer {
       m_driverController.y().onTrue(new SetDriveParametersCommand(0.4, 0.2));
       // set a faster speed
       m_driverController.x().onTrue(new SetDriveParametersCommand(0.6, 0.4));
-      m_driverController.a().onTrue(new SetDriveParametersCommand(0.66, 0.44));
+      m_driverController.a().onTrue(Autos.MoveRotate4Times(m_simpleDriveTrainSubsystem));
     } else {
       // set Button.b as tankdrive for 50 revs at speed 0.4
       m_driverController.y().onTrue(new DriveForwardCommand(m_simpleDriveTrainSubsystem, SimulationConstants.simEncoderRevolutions, SimulationConstants.simSpeed));
